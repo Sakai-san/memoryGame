@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<morpion>
+	<players>
+		<player id ="983">
+			<name>stephane</name>
+			<ip>134.21.34.236</ip>
+			<time>1361466608</time>
+		</player>
+		<player id ="3552">
+			<name>1361466618</name>
+			<ip>134.21.34.233</ip>
+		</player>
+	</players>
+
+	<games>
+		<game id="session_concat">
+			<player1 ref="983" />
+			<player2 ref="3552" />
+			<player1_wins>0</player1_wins>
+			<player2_wins>0</player2_wins>
+			<deuce>0</deuce>
+			<total>0</total>
+			<last_played ref="983"/>
+		</game>
+	</games>
+
+</morpion>

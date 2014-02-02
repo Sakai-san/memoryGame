@@ -1,0 +1,59 @@
+@CHARSET "UTF-8";
+
+*{
+	margin: 0px;
+	padding: 0px;
+}
+.regle {
+	font-family: "Courier";
+	font-style : italic;
+}
+.emphasis {
+	font-family: "Arial";
+	color: rgb(123, 123, 21);
+}
+.hover {
+	cursor: pointer;
+}
+.emphasis {
+	font-weight: bold;
+}
+.hidden {
+	display: none;
+}
+h1 {
+	text-align: center;
+}
+table td {
+	display: inline-block;
+	margin : 10px;
+	border: 1px solid black;
+	width: 80px;
+	height: 80px;	
+}
+table td img {
+	width: 80px;
+	height: 80px;
+	display : block;
+	margin : 0 auto;
+}
+.opacity {
+	opacity: 0.5;
+}
+.left{
+	display: inline-block;
+	margin : 20px 0 0 30px ;
+	width:100px;
+	vertical-align:top;
+}
+#game{
+	display: inline-block;
+	width: 80%;
+	margin: 0px 10px 0 20px;
+}
+.infos{
+	position: relative;
+}
+.photo_background{
+	background-image : url('pattern.jpg');
+}

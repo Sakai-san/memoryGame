@@ -1,0 +1,414 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!-- saved from url=(0080)http://www.nolithius.com/game-development/comet-long-polling-with-php-and-jquery -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+		<title>Nolithius.com - Comet Long Polling with PHP and jQuery</title>
+
+		<link rel="stylesheet" type="text/css" href="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/style.css">
+		<link rel="stylesheet" type="text/css" href="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/thickbox.css">
+		<link rel="stylesheet" type="text/css" href="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/shCore.css">
+		<link rel="stylesheet" type="text/css" href="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/shThemeDefault.css">
+
+		<link rel="alternate" type="application/rss+xml" href="http://feeds.feedburner.com/nolithius">
+		<link rel="icon" type="image/png" href="http://www.nolithius.com/favicon.png">
+
+		<script type="text/javascript" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/jquery.js"></script>
+		<script type="text/javascript" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/thickbox.js"></script>
+
+                                    <script type="text/javascript" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/shCore.js"></script>
+                    <script type="text/javascript" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/shBrushAS3.js"></script>
+                    <script type="text/javascript" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/shBrushJScript.js"></script>
+                    <script type="text/javascript" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/shBrushPhp.js"></script>
+                    <script type="text/javascript">
+                            SyntaxHighlighter.all();
+                    </script>
+                
+                <script type="text/javascript" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/nolithius.js"></script>
+
+	</head>
+
+	<body>
+
+		<div id="top">
+
+			<a id="header" href="http://www.nolithius.com/">
+				<span id="home_of">Home of</span>
+				<span id="ebyan">Ebyan Alvarez-Buylla</span>
+			</a>
+
+		</div>
+
+		<div id="center">
+
+                    
+			<div id="main">
+<div class="post">
+
+    <div class="post_header">
+
+        <div class="post_category">
+
+                        <a class="category category_active" href="http://www.nolithius.com/category/game-development">Game development</a>
+
+        </div>
+        <div class="post-title">
+                        <h3>Comet Long Polling with PHP and jQuery</h3>
+            <div class="post_date">January 10th, 2012</div>
+        </div>
+
+    </div>
+
+    <div class="post_main">
+
+        <div class="post_left">
+
+            <div class="post_tags">
+
+<div><a class="tag" href="http://www.nolithius.com/tag/ajax">ajax</a></div><div><a class="tag" href="http://www.nolithius.com/tag/javascript">javascript</a></div><div><a class="tag" href="http://www.nolithius.com/tag/jquery">jquery</a></div><div><a class="tag" href="http://www.nolithius.com/tag/mysql">mysql</a></div><div><a class="tag" href="http://www.nolithius.com/tag/php">php</a></div><div><a class="tag" href="http://www.nolithius.com/tag/web-games">web games</a></div>            </div>
+        </div>
+
+        <div class="content single">
+            <div class="post_image">
+
+                <img src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/comet_large.jpg" alt="Comet Long Polling with PHP and jQuery">
+            </div>
+
+<p><a href="http://en.wikipedia.org/wiki/Comet_%28programming%29" target="_blank">Comet</a> describes a number of techniques with which a web server may push information to a client in a non-transactional format. <a href="http://en.wikipedia.org/w/index.php?title=Long_polling" target="_blank">Long Polling</a> is one of such techniques, in which a browser’s request remains open until the server has information to send.</p>
+<p>Long Polling is particularly useful in semi-synchronous applications, such as chat rooms and turn-based games, and is straightforward to implement with PHP and jQuery:<span id="more-983"></span></p>
+<h4>Serverside</h4>
+<p>The serverside component of Long Polling requires that, contrary to the usual transactional model, the request not be answered right away. To achieve this, we put PHP to <tt>sleep()</tt>:</p>
+<div><div id="highlighter_440482" class="syntaxhighlighter nogutter  php"><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="code"><div class="container"><div class="line number1 index0 alt2"><code class="php comments">// How often to poll, in microseconds (1,000,000 μs equals 1 s)</code></div><div class="line number2 index1 alt1"><code class="php plain">define(</code><code class="php string">'MESSAGE_POLL_MICROSECONDS'</code><code class="php plain">, 500000);</code></div><div class="line number3 index2 alt2">&nbsp;</div><div class="line number4 index3 alt1"><code class="php comments">// How long to keep the Long Poll open, in seconds</code></div><div class="line number5 index4 alt2"><code class="php plain">define(</code><code class="php string">'MESSAGE_TIMEOUT_SECONDS'</code><code class="php plain">, 30);</code></div><div class="line number6 index5 alt1">&nbsp;</div><div class="line number7 index6 alt2"><code class="php comments">// Timeout padding in seconds, to avoid a premature timeout in case the last call in the loop is taking a while</code></div><div class="line number8 index7 alt1"><code class="php plain">define(</code><code class="php string">'MESSAGE_TIMEOUT_SECONDS_BUFFER'</code><code class="php plain">, 5);</code></div><div class="line number9 index8 alt2">&nbsp;</div><div class="line number10 index9 alt1"><code class="php comments">// Hold on to any session data you might need now, since we need to close the session before entering the sleep loop</code></div><div class="line number11 index10 alt2"><code class="php variable">$user_id</code> <code class="php plain">= </code><code class="php variable">$_SESSION</code><code class="php plain">[</code><code class="php string">'id'</code><code class="php plain">];</code></div><div class="line number12 index11 alt1">&nbsp;</div><div class="line number13 index12 alt2"><code class="php comments">// Close the session prematurely to avoid usleep() from locking other requests</code></div><div class="line number14 index13 alt1"><code class="php plain">session_write_close();</code></div><div class="line number15 index14 alt2">&nbsp;</div><div class="line number16 index15 alt1"><code class="php comments">// Automatically die after timeout (plus buffer)</code></div><div class="line number17 index16 alt2"><code class="php plain">set_time_limit(MESSAGE_TIMEOUT_SECONDS+MESSAGE_TIMEOUT_SECONDS_BUFFER);</code></div><div class="line number18 index17 alt1">&nbsp;</div><div class="line number19 index18 alt2"><code class="php comments">// Counter to manually keep track of time elapsed (PHP's set_time_limit() is unrealiable while sleeping)</code></div><div class="line number20 index19 alt1"><code class="php variable">$counter</code> <code class="php plain">= MESSAGE_TIMEOUT_SECONDS;</code></div><div class="line number21 index20 alt2">&nbsp;</div><div class="line number22 index21 alt1"><code class="php comments">// Poll for messages and hang if nothing is found, until the timeout is exhausted</code></div><div class="line number23 index22 alt2"><code class="php keyword">while</code><code class="php plain">(</code><code class="php variable">$counter</code> <code class="php plain">&gt; 0)</code></div><div class="line number24 index23 alt1"><code class="php plain">{</code></div><div class="line number25 index24 alt2"><code class="php spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="php comments">// Check for new data (not illustrated)</code></div><div class="line number26 index25 alt1"><code class="php spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="php keyword">if</code><code class="php plain">(</code><code class="php variable">$data</code> <code class="php plain">= getNewData(</code><code class="php variable">$user_id</code><code class="php plain">))</code></div><div class="line number27 index26 alt2"><code class="php spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="php plain">{</code></div><div class="line number28 index27 alt1"><code class="php spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="php comments">// Break out of while loop if new data is populated</code></div><div class="line number29 index28 alt2"><code class="php spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="php keyword">break</code><code class="php plain">;</code></div><div class="line number30 index29 alt1"><code class="php spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="php plain">}</code></div><div class="line number31 index30 alt2"><code class="php spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="php keyword">else</code></div><div class="line number32 index31 alt1"><code class="php spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="php plain">{</code></div><div class="line number33 index32 alt2"><code class="php spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="php comments">// Otherwise, sleep for the specified time, after which the loop runs again</code></div><div class="line number34 index33 alt1"><code class="php spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="php plain">usleep(MESSAGE_POLL_MICROSECONDS);</code></div><div class="line number35 index34 alt2">&nbsp;</div><div class="line number36 index35 alt1"><code class="php spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="php comments">// Decrement seconds from counter (the interval was set in μs, see above)</code></div><div class="line number37 index36 alt2"><code class="php spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="php variable">$counter</code> <code class="php plain">-= MESSAGE_POLL_MICROSECONDS / 1000000;</code></div><div class="line number38 index37 alt1"><code class="php spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="php plain">}</code></div><div class="line number39 index38 alt2"><code class="php plain">}</code></div><div class="line number40 index39 alt1">&nbsp;</div><div class="line number41 index40 alt2"><code class="php comments">// If we've made it this far, we've either timed out or have some data to deliver to the client</code></div><div class="line number42 index41 alt1"><code class="php keyword">if</code><code class="php plain">(isset(</code><code class="php variable">$data</code><code class="php plain">))</code></div><div class="line number43 index42 alt2"><code class="php plain">{</code></div><div class="line number44 index43 alt1"><code class="php spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="php comments">// Send data to client; you may want to precede it by a mime type definition header, eg. in the case of JSON or XML</code></div><div class="line number45 index44 alt2"><code class="php spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="php functions">echo</code> <code class="php variable">$data</code><code class="php plain">;</code></div><div class="line number46 index45 alt1"><code class="php plain">}</code></div></div></td></tr></tbody></table></div></div>
+<p>This example holds on to the connection, for up to 30 seconds, until new information is found in the database, at which point it is delivered to the client. Note that we are using <tt>usleep()</tt>, which takes microseconds instead of seconds.</p>
+<h4>Clientside</h4>
+<p>The client is responsible for keeping the request alive at all times: once the process begins (usually on DOM ready, although in some browsers it might be offset, as noted below), when the request times out, and when the request returns useful information, at which point it must handle it:</p>
+<div><div id="highlighter_546790" class="syntaxhighlighter nogutter  jscript"><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="code"><div class="container"><div class="line number1 index0 alt2"><code class="jscript plain">$(</code><code class="jscript keyword">function</code><code class="jscript plain">()</code></div><div class="line number2 index1 alt1"><code class="jscript plain">{</code></div><div class="line number3 index2 alt2"><code class="jscript spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="jscript comments">// Main Long Poll function</code></div><div class="line number4 index3 alt1"><code class="jscript spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="jscript keyword">function</code> <code class="jscript plain">longPoll()</code></div><div class="line number5 index4 alt2"><code class="jscript spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="jscript plain">{</code></div><div class="line number6 index5 alt1"><code class="jscript spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="jscript comments">// Open an AJAX call to the server's Long Poll PHP file</code></div><div class="line number7 index6 alt2"><code class="jscript spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="jscript plain">$.get('longpoll.php', </code><code class="jscript keyword">function</code><code class="jscript plain">(data)</code></div><div class="line number8 index7 alt1"><code class="jscript spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="jscript plain">{</code></div><div class="line number9 index8 alt2"><code class="jscript spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="jscript comments">// Callback to handle message sent from server (not illustrated)</code></div><div class="line number10 index9 alt1"><code class="jscript spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="jscript plain">handleServerMessage(data);</code></div><div class="line number11 index10 alt2">&nbsp;</div><div class="line number12 index11 alt1"><code class="jscript spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="jscript comments">// Open the Long Poll again</code></div><div class="line number13 index12 alt2"><code class="jscript spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="jscript plain">longPoll();</code></div><div class="line number14 index13 alt1"><code class="jscript spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="jscript plain">});</code></div><div class="line number15 index14 alt2"><code class="jscript spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="jscript plain">}</code></div><div class="line number16 index15 alt1">&nbsp;</div><div class="line number17 index16 alt2"><code class="jscript spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="jscript comments">// Make the initial call to Long Poll</code></div><div class="line number18 index17 alt1"><code class="jscript spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="jscript plain">longPoll();</code></div><div class="line number19 index18 alt2"><code class="jscript plain">}</code></div></div></td></tr></tbody></table></div></div>
+<p>In JavaScript, we immediately open another Long Poll upon the previous call returning useful data or timing out; all of the timeouts are handled serverside.</p>
+<h4>Caveats</h4>
+<p>At first glance Long Polling is a no-brainer upgrade from the classic polling: it’s more responsive, has less network overhead, and is fairly straightforward to implement. However, it is not without its flaws:</p>
+<h5>Database is hit more often</h5>
+<p>In the example above, the database is hit twice every second. If we had 100 concurrent users for one hour, that would be 720,000 database requests, the overwhelming majority of which will return no data. For certain light database systems, this overhead might be negligible, but you’ll want to pair MySQL with a <a href="http://php.net/manual/en/book.memcache.php" target="_blank">Memcache</a> server that will handle these frequent requests with little overhead. Memcache works well with Long Polling, since the database access consists of all <tt>INSERT</tt>s, for the part of the program adding new data to be retrieved, and <tt>SELECT</tt>s, for the part that is fetching the new messages, as illustrated above.</p>
+<h5>PHP sleeps across the entire session</h5>
+<p>When you make a call to <tt>sleep()</tt> or <tt>usleep()</tt>, PHP will pause execution across the entire session, which means that any other AJAX requests or even pageloads will have to wait until the request returns or times out. To address this, ensure the session is closed before entering the serverside sleep loop.</p>
+<h5>Chrome and iOS Safari think the page is loading</h5>
+<p>Chrome and iOS devices’ Safari will display the “waiting” or “loading” messages, along with their respective spinning or bar loaders while a Long Poll is open. In Chrome, this can be combated by offsetting the execution of the initial Long Poll request by a few seconds after DOM load, with <tt>setTimeout()</tt>. I have not tested whether this approach works in iOS devices as well.</p>
+<h5>[Edit] set_time_limit() is unreliable when sleeping</h5>
+<p>Digging around in the <a href="http://www.php.net/sleep" target="_blank"><tt>sleep()</tt></a> and <a href="http://www.php.net/set_time_limit" target="_blank"><tt>set_time_limit()</tt></a> function reference has revealed that time sleeping is not counted towards PHP’s internal execution clock in Linux machines, and therefore will not advance the counter for <tt>set_time_limit()</tt>. You must manually count the time and exit the loop on timeout, as illustrated above. I have left the <tt>set_time_limit()</tt> code in for Windows machines, and to account for the edge cases in which the script execution takes up the full timeout time.</p>
+<p><small><em>Header image by <a href="http://www.jacknewton.com/" target="_blank">Jack Newton</a>.</em></small></p>
+            <div class="post_footer">
+
+
+<!-- You can start editing here. -->
+
+	<h3 id="comments">10 Responses to “Comet Long Polling with PHP and jQuery”</h3>
+
+	<div class="navigation">
+		<div class="alignleft"></div>
+		<div class="alignright"></div>
+	</div>
+
+	<ol class="commentlist">
+			<li class="comment even thread-even depth-1" id="comment-22018">
+				<div id="div-comment-22018" class="comment-body">
+				<div class="comment-author vcard">
+		<img alt="" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/3dc7e74eedbe4dfe01f4fb289e7217f0" class="avatar avatar-32 photo" height="32" width="32">		<cite class="fn"><a href="http://roguewombat.wordpress.com/" rel="external nofollow" class="url">Ryan</a></cite> <span class="says">says:</span>		</div>
+
+		<div class="comment-meta commentmetadata"><a href="http://www.nolithius.com/game-development/comet-long-polling-with-php-and-jquery#comment-22018">
+			January 11, 2012 at 4:10 pm</a>		</div>
+
+		<p>From a server administration standpoint, what does it do to your memory usage to have all these persistent connections open in PHP? Will it be trying to spawn an apache instance for each long poll you have open?</p>
+
+		<div class="reply">
+				</div>
+				</div>
+		</li>
+		<li class="comment byuser comment-author-admin bypostauthor odd alt thread-odd thread-alt depth-1" id="comment-22044">
+				<div id="div-comment-22044" class="comment-body">
+				<div class="comment-author vcard">
+		<img alt="" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/506bc8ea85bedbcbd1d9bd956ee54912" class="avatar avatar-32 photo" height="32" width="32">		<cite class="fn"><a href="http://www.nolithius.com/" rel="external nofollow" class="url">Ebyan Alvarez-Buylla</a></cite> <span class="says">says:</span>		</div>
+
+		<div class="comment-meta commentmetadata"><a href="http://www.nolithius.com/game-development/comet-long-polling-with-php-and-jquery#comment-22044">
+			January 12, 2012 at 9:53 am</a>		</div>
+
+		<p>Memory usage from the PHP end is very light, since it will be sleeping over 99% of the time. The call to session_write_close() will not destroy the session in either PHP or Apache, it just circumvents PHP’s session variable locking (PHP’s session data is locked as to to prevent concurrent writes from multiple scripts, so only one script may operate on a session at a time).</p>
+<p>Apache will treat a Long Poll request much as any other AJAX call, or any other request to a resource within a session, so it will not spawn a new instance of itself.</p>
+<p>Where you might get in trouble with performance is on the MySQL end, hence the Memcache recommendation, which results in more memory usage altogether, but much less IO overhead.</p>
+
+		<div class="reply">
+				</div>
+				</div>
+		</li>
+		<li class="comment even thread-even depth-1" id="comment-22955">
+				<div id="div-comment-22955" class="comment-body">
+				<div class="comment-author vcard">
+		<img alt="" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/9ae8e90e84b4d81cb9985a29cc90b555" class="avatar avatar-32 photo" height="32" width="32">		<cite class="fn">L</cite> <span class="says">says:</span>		</div>
+
+		<div class="comment-meta commentmetadata"><a href="http://www.nolithius.com/game-development/comet-long-polling-with-php-and-jquery#comment-22955">
+			February 16, 2012 at 6:16 am</a>		</div>
+
+		<p>how big is memory usage if you use infinite while loop instead of timing out after 30 seconds. Im working curently on a reverse ajax chat, and i saw on one example on the web (don’t really remember where) it uses infinite loop with set_time_limit(0) and while(true){}</p>
+<p>wouldn’t that be an overkill because if that’s the case, it will never expire, even if you close ajax request, it won’t expire. If you go again to that chat it will just add a new instance of the loop over the previous one, and in no time you’ll have …che of apache :\</p>
+
+		<div class="reply">
+				</div>
+				</div>
+		</li>
+		<li class="comment byuser comment-author-admin bypostauthor odd alt thread-odd thread-alt depth-1" id="comment-22962">
+				<div id="div-comment-22962" class="comment-body">
+				<div class="comment-author vcard">
+		<img alt="" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/506bc8ea85bedbcbd1d9bd956ee54912" class="avatar avatar-32 photo" height="32" width="32">		<cite class="fn"><a href="http://www.nolithius.com/" rel="external nofollow" class="url">Ebyan Alvarez-Buylla</a></cite> <span class="says">says:</span>		</div>
+
+		<div class="comment-meta commentmetadata"><a href="http://www.nolithius.com/game-development/comet-long-polling-with-php-and-jquery#comment-22962">
+			February 16, 2012 at 10:15 am</a>		</div>
+
+		<p>L, I think you’ve answered your own question here: in a Long Poll, the combination of an infinite loop and disabling PHP’s timeout can certainly crash the server. The author of the example you mention is probably making the potentially dangerous assumption that data will be available quickly and that Long Polls won’t stay open for long.</p>
+<p>We should be prudent and handle the not-so-edge-case in which data is not immediately available and we spin each client for enough time to crash the server. In a chat room situation, for example, you can have a huge number of people connected to a system overnight, all idle. Worse yet, if a user closes the client and no timeouts are in place, as you note, the Long Poll remains open.</p>
+<p>I would never, without exceptions, use a deliberately infinite loop such as while(true){} <em>and</em> set_time_limit(0). You’ll notice, in fact, that in the example above I use PHP’s timeout <em>as well as</em> counting the time explicitly to make absolutely certain that there are no Long Polls spinning longer than would be safe. This might be overkill, but an ounce of prevention is worth a ton of trauma!</p>
+<p>Since you should be reopening the connection from the JavaScript end both when data is received or when it times out serverside, the small overhead of reestablishing a connection every 30 seconds or so is a small price to pay to ensure your server stays up.</p>
+
+		<div class="reply">
+				</div>
+				</div>
+		</li>
+		<li class="comment even thread-even depth-1" id="comment-22992">
+				<div id="div-comment-22992" class="comment-body">
+				<div class="comment-author vcard">
+		<img alt="" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/9ae8e90e84b4d81cb9985a29cc90b555" class="avatar avatar-32 photo" height="32" width="32">		<cite class="fn">L</cite> <span class="says">says:</span>		</div>
+
+		<div class="comment-meta commentmetadata"><a href="http://www.nolithius.com/game-development/comet-long-polling-with-php-and-jquery#comment-22992">
+			February 17, 2012 at 9:29 am</a>		</div>
+
+		<p>Thank you for your fast reply E. i just found some function it’s called ignore_user_abort(), if i set it to false, when the user exits, or aborts ajax call, it will stop that instance of script. would that be helpful, i mean would that be the same as timing out after 30sec, in my example it will never expire until user exits the script, and in your example it will timeout every 30sec, and if user exits the script, it would stop execution of that instance…?</p>
+
+		<div class="reply">
+				</div>
+				</div>
+		</li>
+		<li class="comment byuser comment-author-admin bypostauthor odd alt thread-odd thread-alt depth-1" id="comment-22994">
+				<div id="div-comment-22994" class="comment-body">
+				<div class="comment-author vcard">
+		<img alt="" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/506bc8ea85bedbcbd1d9bd956ee54912" class="avatar avatar-32 photo" height="32" width="32">		<cite class="fn"><a href="http://www.nolithius.com/" rel="external nofollow" class="url">Ebyan Alvarez-Buylla</a></cite> <span class="says">says:</span>		</div>
+
+		<div class="comment-meta commentmetadata"><a href="http://www.nolithius.com/game-development/comet-long-polling-with-php-and-jquery#comment-22994">
+			February 17, 2012 at 10:44 am</a>		</div>
+
+		<p>I have not played around with the ignore_user_abort() function/setting, but from what I can gather from the PHP documentation, it only works for CLI connections, not through the web.</p>
+<p>Something I’ve also recently found out while delving deeper into this topic is that set_time_limit() is also irrelevant in a Long Polling situation, since time sleeping is not counted towards program execution (take a look at the sleep() function reference). In a Long Poll, we are sleeping most of the time, and the small fractions of time which we use to check for new data is the only time aggregated to PHP’s internal timeout clock. Although I originally hinted at it being overkill to measure the time yourself in addition to PHP, I now retract that statement: you must count the time manually it if you want to enforce a reliable timeout; might as well ignore PHP’s timeout altogether.</p>
+<p>L, what are your concerns with reestablishing the connection every 30 seconds?</p>
+
+		<div class="reply">
+				</div>
+				</div>
+		</li>
+		<li class="comment even thread-even depth-1" id="comment-22998">
+				<div id="div-comment-22998" class="comment-body">
+				<div class="comment-author vcard">
+		<img alt="" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/9ae8e90e84b4d81cb9985a29cc90b555" class="avatar avatar-32 photo" height="32" width="32">		<cite class="fn">L</cite> <span class="says">says:</span>		</div>
+
+		<div class="comment-meta commentmetadata"><a href="http://www.nolithius.com/game-development/comet-long-polling-with-php-and-jquery#comment-22998">
+			February 17, 2012 at 12:50 pm</a>		</div>
+
+		<p>i don’t have much concerns about reestablishing connection after 30 sec, if that’s the best way, i’ll rewrite my script a little bit, it’s not a problem, i just tought it would be logicaly better [if it's the same matter, and you can use ignore_user_abort() function, but apperently as you mention it, i can't... didn't saw that about CLI] if you open it once and keep it open, then to open/close it every 30sec.</p>
+
+		<div class="reply">
+				</div>
+				</div>
+		</li>
+		<li class="comment odd alt thread-odd thread-alt depth-1" id="comment-25688">
+				<div id="div-comment-25688" class="comment-body">
+				<div class="comment-author vcard">
+		<img alt="" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/7128b63c58f2b74a7251d6e7702fb510" class="avatar avatar-32 photo" height="32" width="32">		<cite class="fn">Asanka</cite> <span class="says">says:</span>		</div>
+
+		<div class="comment-meta commentmetadata"><a href="http://www.nolithius.com/game-development/comet-long-polling-with-php-and-jquery#comment-25688">
+			May 22, 2012 at 12:58 am</a>		</div>
+
+		<p>This article saved me lot of time when developing a real time picture analyzer tool for my latest project. thanks a lot friend.</p>
+
+		<div class="reply">
+				</div>
+				</div>
+		</li>
+		<li class="comment even thread-even depth-1" id="comment-28250">
+				<div id="div-comment-28250" class="comment-body">
+				<div class="comment-author vcard">
+		<img alt="" src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/3a0ca8ad4703a47dbd6ede177441b087" class="avatar avatar-32 photo" height="32" width="32">		<cite class="fn"><a href="http://facebook.com/sojanjose4u" rel="external nofollow" class="url">sojan</a></cite> <span class="says">says:</span>		</div>
+
+		<div class="comment-meta commentmetadata"><a href="http://www.nolithius.com/game-development/comet-long-polling-with-php-and-jquery#comment-28250">
+			September 3, 2012 at 12:26 pm</a>		</div>
+
+		<p>thanks a lot for this …</p>
+
+		<div class="reply">
+				</div>
+				</div>
+		</li>
+		<li class="pingback odd alt thread-odd thread-alt depth-1" id="comment-28431">
+				<div id="div-comment-28431" class="comment-body">
+				<div class="comment-author vcard">
+				<cite class="fn"><a href="http://jisku.com/blog/2012/09/why-should-session_write_close-be-used-in-long-polling/" rel="external nofollow" class="url">Why should session_write_close be used in long polling? | Jisku.com - Developers Network</a></cite> <span class="says">says:</span>		</div>
+
+		<div class="comment-meta commentmetadata"><a href="http://www.nolithius.com/game-development/comet-long-polling-with-php-and-jquery#comment-28431">
+			September 13, 2012 at 2:36 am</a>		</div>
+
+		<p>[...] session_write_close be used in long polling?   I was reading an article about long polling at Nolithius. Under the section PHP sleeps across the entire session, it is written that the session_write_close [...]</p>
+
+		<div class="reply">
+				</div>
+				</div>
+		</li>
+	</ol>
+
+	<div class="navigation">
+		<div class="alignleft"></div>
+		<div class="alignright"></div>
+	</div>
+ 
+
+
+<div id="respond">
+
+<h3>Leave a Reply</h3>
+
+<div id="cancel-comment-reply"> 
+	<small><a rel="nofollow" id="cancel-comment-reply-link" href="http://www.nolithius.com/game-development/comet-long-polling-with-php-and-jquery#respond" style="display:none;">Click here to cancel reply.</a></small>
+</div> 
+
+
+<form action="http://www.nolithius.com/wp-comments-post.php" method="post" id="commentform">
+
+
+<p><input type="text" name="author" id="author" value="" size="22" tabindex="1" aria-required="true">
+<label for="author"><small>Name (required)</small></label></p>
+
+<p><input type="text" name="email" id="email" value="" size="22" tabindex="2" aria-required="true">
+<label for="email"><small>Mail (will not be published) (required)</small></label></p>
+
+<p><input type="text" name="url" id="url" value="" size="22" tabindex="3">
+<label for="url"><small>Website</small></label></p>
+
+
+<!--<p><small><strong>XHTML:</strong> You can use these tags: <code>&lt;a href=&quot;&quot; title=&quot;&quot;&gt; &lt;abbr title=&quot;&quot;&gt; &lt;acronym title=&quot;&quot;&gt; &lt;b&gt; &lt;blockquote cite=&quot;&quot;&gt; &lt;cite&gt; &lt;code&gt; &lt;del datetime=&quot;&quot;&gt; &lt;em&gt; &lt;i&gt; &lt;q cite=&quot;&quot;&gt; &lt;strike&gt; &lt;strong&gt; </code></small></p>-->
+
+<p><textarea name="comment" id="comment" cols="58" rows="10" tabindex="4"></textarea></p>
+
+<p><input name="submit" type="submit" id="submit" tabindex="5" value="Submit Comment">
+<input type="hidden" name="comment_post_ID" value="983" id="comment_post_ID">
+<input type="hidden" name="comment_parent" id="comment_parent" value="0">
+ 
+</p>
+<p style="display: none;"><input type="hidden" id="akismet_comment_nonce" name="akismet_comment_nonce" value="4e08134c54"></p><!-- BEGIN: subscribe to comments reloaded --><p id="subscribe-to-comments"><input type="checkbox" name="subscribe-reloaded" id="subscribe-reloaded" value="yes" checked="checked"><label for="subscribe-reloaded">Notify me of followup comments via e-mail.<strong>(highly recommended!)</strong></label></p><!-- END: subscribe to comments reloaded -->
+</form>
+
+</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+                </div>
+
+                <div id="sidebar">
+
+                    <div class="pages">
+
+                        <div class="title">Games</div>
+                        <div><a target="_blank" href="http://www.crossworddungeon.com/">Crossword Dungeon</a></div>
+                        <div><a target="_blank" href="http://www.nolithius.com/guild">The Adventurer's Guild</a></div>
+                        <div><a target="_blank" href="http://www.nolithius.com/color">The Color Guessing Game</a></div>
+                        <div><a target="_blank" href="http://www.nolithius.com/dod">Dance of Death</a></div>
+                        <div><a target="_blank" href="http://www.nolithius.com/chronophase">Chronophase</a></div>
+                        <div><a href="http://www.nolithius.com/game-development/petri-dish-the-extinction-of-color">Petri Dish</a></div>
+
+                    </div>
+
+                    <div class="categories">
+
+                        <div class="title">Categories</div>
+                        <div class="post_category">
+                            <div><a class="category category_active" href="http://www.nolithius.com/category/game-development">Game development</a></div>
+                            <div><a class="category " href="http://www.nolithius.com/category/game-design">Game design</a></div>
+                            <div><a class="category " href="http://www.nolithius.com/category/misc">Misc</a></div>
+                        </div>
+
+                    </div>
+
+                    <div class="series">
+
+                        <div class="title">Series</div>
+                        <div class="post_series">
+                                                                <div class="post-series"><a href="http://www.nolithius.com/category/approaches-to-game-design">Approaches to Game Design</a></div>
+                                                                <div class="post-series"><a href="http://www.nolithius.com/category/crossword-dungeon">Crossword Dungeon</a></div>
+                                                                <div class="post-series"><a href="http://www.nolithius.com/category/game-design-podcasts">Game Design Podcasts</a></div>
+                                                                <div class="post-series"><a href="http://www.nolithius.com/category/procedural-content-generation">Procedural Content Generation</a></div>
+                                                                <div class="post-series"><a href="http://www.nolithius.com/category/the-adventurers-guild">The Adventurer's Guild</a></div>
+                                                                <div class="post-series"><a href="http://www.nolithius.com/category/the-color-guessing-game">The Color Guessing Game</a></div>
+                                                    </div>
+
+                    </div>
+
+                    <div class="search">
+
+                        <form action="http://www.nolithius.com/" method="GET">
+
+                            <input name="s" type="text" class="text"><input type="submit" class="submit" value="Search">
+
+                        </form>
+
+                    </div>
+
+                    <div class="tags">
+
+                        <div class="title">Tags</div>
+                        <div class="post_tags">
+
+                            <div><a class="tag" href="http://www.nolithius.com/tag/roguelike">roguelike</a></div><div><a class="tag" href="http://www.nolithius.com/tag/dance-of-death">dance of death</a></div><div><a class="tag" href="http://www.nolithius.com/tag/development">development</a></div><div><a class="tag" href="http://www.nolithius.com/tag/as3">as3</a></div><div><a class="tag" href="http://www.nolithius.com/tag/progress-update">progress update</a></div><div><a class="tag" href="http://www.nolithius.com/tag/flash">flash</a></div><div><a class="tag" href="http://www.nolithius.com/tag/release">release</a></div><div><a class="tag" href="http://www.nolithius.com/tag/goals">goals</a></div><div><a class="tag" href="http://www.nolithius.com/tag/php">php</a></div><div><a class="tag" href="http://www.nolithius.com/tag/strategy-games">strategy games</a></div><div><a class="tag" href="http://www.nolithius.com/tag/web-games">web games</a></div><div><a class="tag" href="http://www.nolithius.com/tag/collaboration">collaboration</a></div><div><a class="tag" href="http://www.nolithius.com/tag/mysql">mysql</a></div><div><a class="tag" href="http://www.nolithius.com/tag/ui">ui</a></div><div><a class="tag" href="http://www.nolithius.com/tag/character-creation">character creation</a></div><div><a class="tag" href="http://www.nolithius.com/tag/javascript">javascript</a></div><div><a class="tag" href="http://www.nolithius.com/tag/momentum">momentum</a></div><div><a class="tag" href="http://www.nolithius.com/tag/permanence">permanence</a></div><div><a class="tag" href="http://www.nolithius.com/tag/wilderness-generation">wilderness generation</a></div><div><a class="tag" href="http://www.nolithius.com/tag/word-games">word games</a></div><div><a class="tag" href="http://www.nolithius.com/tag/world-generation">world generation</a></div><div><a class="tag" href="http://www.nolithius.com/tag/7drl">7drl</a></div><div><a class="tag" href="http://www.nolithius.com/tag/cocos2d">cocos2d</a></div><div><a class="tag" href="http://www.nolithius.com/tag/collectible-card-games">collectible card games</a></div><div><a class="tag" href="http://www.nolithius.com/tag/inspiration">inspiration</a></div><div><a class="tag" href="http://www.nolithius.com/tag/jquery">jquery</a></div><div><a class="tag" href="http://www.nolithius.com/tag/keyboard">keyboard</a></div><div><a class="tag" href="http://www.nolithius.com/tag/objective-c">objective c</a></div><div><a class="tag" href="http://www.nolithius.com/tag/ranged-combat">ranged combat</a></div><div><a class="tag" href="http://www.nolithius.com/tag/ascii">ascii</a></div><div><a class="tag" href="http://www.nolithius.com/tag/challenge">challenge</a></div><div><a class="tag" href="http://www.nolithius.com/tag/ios">ios</a></div><div><a class="tag" href="http://www.nolithius.com/tag/mobile-games">mobile games</a></div><div><a class="tag" href="http://www.nolithius.com/tag/motivation">motivation</a></div><div><a class="tag" href="http://www.nolithius.com/tag/podcasts">podcasts</a></div><div><a class="tag" href="http://www.nolithius.com/tag/4drl">4drl</a></div><div><a class="tag" href="http://www.nolithius.com/tag/ajax">ajax</a></div><div><a class="tag" href="http://www.nolithius.com/tag/animation">animation</a></div><div><a class="tag" href="http://www.nolithius.com/tag/art">art</a></div><div><a class="tag" href="http://www.nolithius.com/tag/dungeon-generation">dungeon generation</a></div><div><a class="tag" href="http://www.nolithius.com/tag/html">html</a></div><div><a class="tag" href="http://www.nolithius.com/tag/international">international</a></div><div><a class="tag" href="http://www.nolithius.com/tag/papervision3d">papervision3d</a></div><div><a class="tag" href="http://www.nolithius.com/tag/scope">scope</a></div>                                <div class="title"><a href="http://www.nolithius.com/game-development/comet-long-polling-with-php-and-jquery#" id="more-tags-button">More...</a></div>
+                                <div id="more-tags">
+                            <div><a class="tag" href="http://www.nolithius.com/tag/alpha">alpha</a></div><div><a class="tag" href="http://www.nolithius.com/tag/analytics">analytics</a></div><div><a class="tag" href="http://www.nolithius.com/tag/backend">backend</a></div><div><a class="tag" href="http://www.nolithius.com/tag/beziers">beziers</a></div><div><a class="tag" href="http://www.nolithius.com/tag/books">books</a></div><div><a class="tag" href="http://www.nolithius.com/tag/break">break</a></div><div><a class="tag" href="http://www.nolithius.com/tag/c">c#</a></div><div><a class="tag" href="http://www.nolithius.com/tag/chronophase">chronophase</a></div><div><a class="tag" href="http://www.nolithius.com/tag/combat">combat</a></div><div><a class="tag" href="http://www.nolithius.com/tag/controls">controls</a></div><div><a class="tag" href="http://www.nolithius.com/tag/css">css</a></div><div><a class="tag" href="http://www.nolithius.com/tag/download">download</a></div><div><a class="tag" href="http://www.nolithius.com/tag/hacks">hacks</a></div><div><a class="tag" href="http://www.nolithius.com/tag/iphone">iphone</a></div><div><a class="tag" href="http://www.nolithius.com/tag/mda">mda</a></div><div><a class="tag" href="http://www.nolithius.com/tag/media">media</a></div><div><a class="tag" href="http://www.nolithius.com/tag/memory-management">memory management</a></div><div><a class="tag" href="http://www.nolithius.com/tag/music">music</a></div><div><a class="tag" href="http://www.nolithius.com/tag/petri-dish">petri dish</a></div><div><a class="tag" href="http://www.nolithius.com/tag/preview">preview</a></div><div><a class="tag" href="http://www.nolithius.com/tag/project-management">project management</a></div><div><a class="tag" href="http://www.nolithius.com/tag/quests">quests</a></div><div><a class="tag" href="http://www.nolithius.com/tag/rgrd">rgrd</a></div><div><a class="tag" href="http://www.nolithius.com/tag/rpgs">rpgs</a></div><div><a class="tag" href="http://www.nolithius.com/tag/saving">saving</a></div><div><a class="tag" href="http://www.nolithius.com/tag/scifi">scifi</a></div><div><a class="tag" href="http://www.nolithius.com/tag/source-code">source code</a></div><div><a class="tag" href="http://www.nolithius.com/tag/twitter">twitter</a></div><div><a class="tag" href="http://www.nolithius.com/tag/xna">xna</a></div><div><a class="tag" href="http://www.nolithius.com/tag/yui">yui</a></div>                                </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+
+        <div id="bottom">
+
+            <div id="footer">
+
+                <div id="footer-container">
+
+                    <div id="copyright">
+                        © 2013 Nolithius, LLC.
+                    </div>
+
+                    <ul id="footer_interior">
+
+                        <li><a class="email" href="mailto:nolithius@gmail.com">nolithius@gmail.com</a></li>
+                        <li><a class="twitter" href="http://twitter.com/nolithius">@nolithius</a></li>
+                        <li><a class="rss" href="http://www.nolithius.com/feed">RSS feed</a></li>
+
+                    </ul>
+
+                </div>
+            </div>
+
+        </div>
+
+		<script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+        </script><script src="./Nolithius.com - Comet Long Polling with PHP and jQuery_files/ga.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            try {
+            var pageTracker = _gat._getTracker("UA-12711848-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+        </script>
+
+	
+
+</body></html>
